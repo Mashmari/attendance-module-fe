@@ -67,7 +67,6 @@ const Admin = (props) => {
         routes={routes}
         logo={{
           innerLink: "/admin/index",
-          imgSrc: require("C:/Users/dell/Documents/GitHub/attendance-module-fe/src/assets/img/brand/cropped-main-logo.jpeg"),
           imgAlt: "...",
         }}
       />

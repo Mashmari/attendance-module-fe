@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import {
   Badge,
@@ -18,40 +17,31 @@ import {
   DropdownMenu,
   DropdownItem,
 } from "reactstrap";
-// core components
 import Header from "components/Headers/Header.js";
 import axios from "axios";
-// import image from "../../assets/img/brand/WIN_20240713_11_29_25_Pro.jpg";
 import { Link } from "react-router-dom";
 
 const Tables = () => {
-  const [show, setShow] = useState(true);
   const [students, setStudents] = useState([]);
   const [statusFilter, setStatusFilter] = useState("All Records");
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const toggleDropdown = () => setDropdownOpen((prevState) => !prevState);
 
-  async function getData() {
-    const response = await axios.get("http://localhost:8080/api/mam/get");
+  async function getData(page = 1, limit = 10) {
+    const response = await axios.get(`http://localhost:8080/api/mam/get?page=${page}&limit=${limit}`);
     console.log(response);
-    if (response.data.length !== 0) {
-      setStudents(response.data);
+    if (response.data.records.length !== 0) {
+      setStudents(response.data.records);
+      setTotalPages(response.data.totalPages);
     }
   }
 
   useEffect(() => {
-    getData();
-  }, []);
-
-  const hoverStyle = {
-    transform: "scale(1.5)",
-    transition: "transform 0.2s",
-  };
-
-  const normalStyle = {
-    transition: "transform 0.2s",
-  };
+    getData(currentPage);
+  }, [currentPage, statusFilter]);
 
   const formatTimestamp = (timestamp) => {
     const date = new Date(timestamp);
@@ -74,6 +64,12 @@ const Tables = () => {
     if (statusFilter === "All Records") return true;
     return student.match_outcome === statusFilter;
   });
+
+  const handlePageChange = (page) => {
+    if (page > 0 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
 
   return (
     <>
@@ -137,7 +133,6 @@ const Tables = () => {
                                 height: "auto",
                                 border: "1px solid #ccc",
                                 borderRadius: 5,
-                                ...normalStyle,
                               }}
                               onMouseOver={(e) => {
                                 e.currentTarget.style.transform = "scale(1.2)";
@@ -177,7 +172,6 @@ const Tables = () => {
                                 className="mt-4"
                                 color="primary"
                                 type="button"
-                                onClick={() => setShow((prev) => !prev)}
                               >
                                 Resolve
                               </Button>
@@ -204,44 +198,36 @@ const Tables = () => {
                     className="pagination justify-content-end mb-0"
                     listClassName="justify-content-end mb-0"
                   >
-                    <PaginationItem className="disabled">
+                    <PaginationItem disabled={currentPage <= 1}>
                       <PaginationLink
-                        href="#pablo"
-                        onClick={(e) => e.preventDefault()}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handlePageChange(currentPage - 1);
+                        }}
                         tabIndex="-1"
                       >
                         <i className="fas fa-angle-left" />
                         <span className="sr-only">Previous</span>
                       </PaginationLink>
                     </PaginationItem>
-                    <PaginationItem className="active">
+                    {[...Array(totalPages).keys()].map((page) => (
+                      <PaginationItem active={page + 1 === currentPage} key={page}>
+                        <PaginationLink
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handlePageChange(page + 1);
+                          }}
+                        >
+                          {page + 1}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+                    <PaginationItem disabled={currentPage >= totalPages}>
                       <PaginationLink
-                        href="#pablo"
-                        onClick={(e) => e.preventDefault()}
-                      >
-                        1
-                      </PaginationLink>
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationLink
-                        href="#pablo"
-                        onClick={(e) => e.preventDefault()}
-                      >
-                        2 <span className="sr-only">(current)</span>
-                      </PaginationLink>
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationLink
-                        href="#pablo"
-                        onClick={(e) => e.preventDefault()}
-                      >
-                        3
-                      </PaginationLink>
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationLink
-                        href="#pablo"
-                        onClick={(e) => e.preventDefault()}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handlePageChange(currentPage + 1);
+                        }}
                       >
                         <i className="fas fa-angle-right" />
                         <span className="sr-only">Next</span>
