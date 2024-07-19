@@ -5,7 +5,9 @@ import Register from "views/examples/Register.js";
 import Login from "views/examples/Login.js";
 import Tables from "views/examples/Tables.js";
 import Icons from "views/examples/Icons.js";
+import Resolveimg from "views/examples/resolveimg.js";
 import Studentdata from "views/examples/Studentdata";
+import Resolveatt from "views/examples/resolveatt.js";
 import Sidebar from "components/Sidebar/Sidebar";
 
 var routes = [
