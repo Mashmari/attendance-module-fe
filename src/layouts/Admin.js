@@ -67,7 +67,7 @@ const Admin = (props) => {
         routes={routes}
         logo={{
           innerLink: "/admin/index",
-          imgSrc: require("/Users/apple/Downloads/argon-dashboard-react-master/argon-dashboard-react-master/src/assets/img/brand/cropped-main-logo.jpeg"),
+          imgSrc: require("C:/Users/dell/Documents/GitHub/attendance-module-fe/src/assets/img/brand/cropped-main-logo.jpeg"),
           imgAlt: "...",
         }}
       />

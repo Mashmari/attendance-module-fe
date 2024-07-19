@@ -1,21 +1,4 @@
-/*!
 
-=========================================================
-* Argon Dashboard React - v1.2.4
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/argon-dashboard-react
-* Copyright 2024 Creative Tim (https://www.creative-tim.com)
-* Licensed under MIT (https://github.com/creativetimofficial/argon-dashboard-react/blob/master/LICENSE.md)
-
-* Coded by Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
-// reactstrap components
 import React, { useEffect, useState } from "react";
 import {
   Badge,
@@ -23,43 +6,99 @@ import {
   Card,
   CardHeader,
   CardFooter,
-  DropdownMenu,
-  DropdownItem,
-  UncontrolledDropdown,
-  DropdownToggle,
   Media,
   Pagination,
   PaginationItem,
   PaginationLink,
-  Progress,
   Table,
   Container,
   Row,
-  UncontrolledTooltip,
+  Dropdown,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem,
 } from "reactstrap";
 // core components
 import Header from "components/Headers/Header.js";
 import axios from "axios";
+// import image from "../../assets/img/brand/WIN_20240713_11_29_25_Pro.jpg";
+import { Link } from "react-router-dom";
 
 const Tables = () => {
   const [show, setShow] = useState(true);
   const [students, setStudents] = useState([]);
+  const [statusFilter, setStatusFilter] = useState("All Records");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const toggleDropdown = () => setDropdownOpen((prevState) => !prevState);
 
   async function getData() {
-    const response = await axios.get("http://localhost:3000/mam");
+    const response = await axios.get("http://localhost:8080/api/mam/get");
     console.log(response);
     if (response.data.length !== 0) {
       setStudents(response.data);
     }
   }
+
   useEffect(() => {
     getData();
   }, []);
+
+  const hoverStyle = {
+    transform: "scale(1.5)",
+    transition: "transform 0.2s",
+  };
+
+  const normalStyle = {
+    transition: "transform 0.2s",
+  };
+
+  const formatTimestamp = (timestamp) => {
+    const date = new Date(timestamp);
+    const formattedDate = date
+      .toLocaleDateString("en-GB")
+      .split("-")
+      .join("");
+    const formattedTime = date.toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    return `${formattedDate} ${formattedTime}`;
+  };
+
+  const formatCoordinates = (value) => {
+    return value.toFixed(6);
+  };
+
+  const filteredStudents = students.filter((student) => {
+    if (statusFilter === "All Records") return true;
+    return student.match_outcome === statusFilter;
+  });
+
   return (
     <>
       <Header />
       {/* Page content */}
       <Container className="mt--7" fluid>
+        {/* Filter Dropdown */}
+        <Row className="mb-3">
+          <div className="col">
+            <Dropdown isOpen={dropdownOpen} toggle={toggleDropdown}>
+              <DropdownToggle caret>Status: {statusFilter}</DropdownToggle>
+              <DropdownMenu>
+                <DropdownItem onClick={() => setStatusFilter("All Records")}>
+                  All Records
+                </DropdownItem>
+                <DropdownItem onClick={() => setStatusFilter("Pass")}>
+                  Pass
+                </DropdownItem>
+                <DropdownItem onClick={() => setStatusFilter("Fail")}>
+                  Fail
+                </DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
+          </div>
+        </Row>
         {/* Table */}
         <Row>
           <div className="col">
@@ -71,55 +110,49 @@ const Tables = () => {
                 <thead className="thead-light">
                   <tr>
                     <th scope="col">Image</th>
-                    <th scope="col">Name of Student</th>
+                    <th scope="col">User Id</th>
                     <th scope="col">Status</th>
-                    <th scope="col">Timestamp & Location</th>
+                    <th scope="col">Date & Time</th>
+                    <th scope="col">Location</th>
                     <th scope="col" />
                   </tr>
                 </thead>
                 <tbody>
-                  {students.map((student) => (
+                  {filteredStudents.map((student) => (
                     <tr key={student.id}>
-                      <th scope="row">
-                        <td>
-                          <Media className="align-items-center">
-                            <div
+                      <td>
+                        <Media className="align-items-center">
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                            }}
+                          >
+                            <img
+                              src={student.Image_storage_path}
+                              alt="Student Image"
+                              id="imageField"
                               style={{
-                                marginBottom: 15,
-                                display: "flex",
-                                alignItems: "center",
+                                maxWidth: 75,
+                                height: "auto",
+                                border: "1px solid #ccc",
+                                borderRadius: 5,
+                                ...normalStyle,
                               }}
-                            >
-                              <label
-                                htmlFor="imageField"
-                                style={{
-                                  flex: 1,
-                                  marginRight: 10,
-                                  color: "purple",
-                                  fontWeight: "bold",
-                                }}
-                              ></label>
-                              <img
-                                src="path_to_image.jpg"
-                                alt="Student Image"
-                                id="imageField"
-                                style={{
-                                  flex: 2,
-                                  maxWidth: 150,
-                                  height: "auto",
-                                  border: "1px solid #ccc",
-                                  borderRadius: 5,
-                                }}
-                              />
-                            </div>
-                          </Media>
-                        </td>
-                      </th>
+                              onMouseOver={(e) => {
+                                e.currentTarget.style.transform = "scale(1.2)";
+                              }}
+                              onMouseOut={(e) => {
+                                e.currentTarget.style.transform = "scale(1)";
+                              }}
+                            />
+                          </div>
+                        </Media>
+                      </td>
                       <td>
                         <Media>
                           <span className="mb-0 text-sm">
-                            {/* =====Response from API will come here==== */}
-                            Raghav Verma
+                            {student.Matched_User_ID}
                           </span>
                         </Media>
                       </td>
@@ -130,25 +163,34 @@ const Tables = () => {
                           {student.match_outcome}
                         </Badge>
                       </td>
-
                       <td>
-                        {/* =====Timestamp from the DB====== */}
-                        {student.Upload_timestamp}
-                        <br/>
-                        ({student.Latitude},
-                        {student.Longitude})
+                        {formatTimestamp(student.Upload_timestamp)}
+                      </td>
+                      <td>
+                        ({formatCoordinates(student.Latitude)}, {formatCoordinates(student.Longitude)})
                       </td>
                       <td className="text-right">
                         <div className="text-center">
-                          {student.match_outcome == "Fail" && (
-                            <Button
-                              className="mt-4"
-                              color="primary"
-                              type="button"
-                              onClick={() => setShow((prev) => !prev)}
-                            >
-                              Add the student
-                            </Button>
+                          {student.match_outcome === "Fail" && student.Status_Pending === "Yes" ? (
+                            <Link to={`/admin/resolveimg?userID=${student.Matched_User_ID}&timestamp=${formatTimestamp(student.Upload_timestamp)}`}>
+                              <Button
+                                className="mt-4"
+                                color="primary"
+                                type="button"
+                                onClick={() => setShow((prev) => !prev)}
+                              >
+                                Resolve
+                              </Button>
+                            </Link>
+                          ) : (
+                            <i
+                              className="fas fa-check"
+                              style={{
+                                color: "green",
+                                fontSize: "24px",
+                                marginTop: "16px",
+                              }}
+                            ></i>
                           )}
                         </div>
                       </td>
