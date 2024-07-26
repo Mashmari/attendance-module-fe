@@ -18,7 +18,7 @@ import {
 const Login = () => {
   return (
     <>
-      <Col lg="6" md="4" className="mx-auto">
+      <Col lg="6" md="6" className="mx-auto">
         <Card className="bg-secondary shadow border-0">
           <CardHeader className="bg-transparent pb-2">
             <div className="text-muted text-center mt-2 mb-2">

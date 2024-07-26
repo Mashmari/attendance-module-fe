@@ -31,7 +31,7 @@ const Tables = () => {
   const toggleDropdown = () => setDropdownOpen((prevState) => !prevState);
 
   async function getData(page = 1, limit = 10) {
-    const response = await axios.get(`http://localhost:8080/api/mam/get?page=${page}&limit=${limit}`);
+    const response = await axios.get(`http://localhost:8080/api/mamAttendance/get?page=${page}&limit=${limit}`);
     console.log(response);
     if (response.data.records.length !== 0) {
       setStudents(response.data.records);
@@ -106,7 +106,7 @@ const Tables = () => {
                 <thead className="thead-light">
                   <tr>
                     <th scope="col">Image</th>
-                    <th scope="col">User Id</th>
+                    <th scope="col">Student Id</th>
                     <th scope="col">Status</th>
                     <th scope="col">Date & Time</th>
                     <th scope="col">Location</th>
@@ -147,7 +147,7 @@ const Tables = () => {
                       <td>
                         <Media>
                           <span className="mb-0 text-sm">
-                            {student.Matched_User_ID}
+                            {student.id}
                           </span>
                         </Media>
                       </td>
@@ -167,7 +167,18 @@ const Tables = () => {
                       <td className="text-right">
                         <div className="text-center">
                           {student.match_outcome === "Fail" && student.Status_Pending === "Yes" ? (
-                            <Link to={`/admin/resolveimg?userID=${student.Matched_User_ID}&timestamp=${formatTimestamp(student.Upload_timestamp)}`}>
+                           <
+                           Link to=
+                           {
+                           `/admin/resolveimg?id=${
+                           student.id
+                           }&timestamp=${
+                           formatTimestamp(student.Upload_timestamp)
+                           }&imagePath=${
+                           encodeURIComponent(student.Image_storage_path)
+                           }`
+                           }
+                           >
                               <Button
                                 className="mt-4"
                                 color="primary"
