@@ -9,6 +9,7 @@ import Resolveimg from "views/examples/resolveimg.js";
 import Studentdata from "views/examples/Studentdata";
 import Resolveatt from "views/examples/resolveatt.js";
 import Sidebar from "components/Sidebar/Sidebar";
+import Testattendance from "views/examples/testattendance";
 
 var routes = [
   {
@@ -17,28 +18,32 @@ var routes = [
     icon: "ni ni-tv-2 text-primary",
     component: <Index />,
     layout: "/admin",
-  },
-  {
-    path: "/tables",
-    name: "Attendance Tables",
-    icon: "ni ni-bullet-list-67 text-red",
-    component: <Tables />,
-    layout: "/admin",
+    hidden: true,
   },
   {
     path: "/studentdata",
-    name: "Student Data",
+    name: "School Data",
     icon: "ni ni-single-02",
     component: <Studentdata />,
     layout: "/admin",
+    
   },
   {
     path: "/resolveatt",
-    name: "Master Attendance Table",
+    name: "Student Roster",
     icon: "ni ni-settings",
     component: <Resolveatt />,
     layout: "/admin",
   },
+  {
+    path: "/tables",
+    name: "Daily Attendance",
+    icon: "ni ni-bullet-list-67 text-red",
+    component: <Tables />,
+    layout: "/admin",
+  },
+ 
+
   {
     path: "/resolveimg",
     name: "Resolve Image Store",
@@ -46,6 +51,14 @@ var routes = [
     component: <Resolveimg />,
     layout: "/admin",
     hidden: true, // Add this line
+  },
+  {
+    path: "/testattendance",
+    name: "Test Attendance",
+    icon: "ni ni-single-02",
+    component: <Testattendance />,
+    layout: "/admin",
+    hidden: true,
   },
   {
     path: "/register",

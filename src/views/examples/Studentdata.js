@@ -71,6 +71,7 @@ const Studentdata = () => {
               <CardHeader className="bg-transparent pb-2">
                 <div className="text-muted text-center mt-2 mb-2">
                   <h1>School Data</h1>
+<<<<<<< Updated upstream
                 </div>
                 <div className="d-flex justify-content-between mb-3">
                   <Input
@@ -106,6 +107,8 @@ const Studentdata = () => {
                       <option key={id} value={id}>{id}</option>
                     ))}
                   </Input>
+=======
+>>>>>>> Stashed changes
                 </div>
               </CardHeader>
               <Table
@@ -181,3 +184,7 @@ const Studentdata = () => {
 };
 
 export default Studentdata;
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
