@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect } from "react";
 import {
   Card,
@@ -14,7 +13,7 @@ import {
 } from "reactstrap";
 import Header from "components/Headers/Header.js";
 import axios from "axios";
-
+ 
 const Studentdata = () => {
   const [students, setStudents] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -22,7 +21,7 @@ const Studentdata = () => {
   const [classNameFilter, setClassNameFilter] = useState("");
   const [locationIdFilter, setLocationIdFilter] = useState("");
   const pageSize = 10;
-
+ 
   useEffect(() => {
     const fetchStudents = async () => {
       try {
@@ -38,10 +37,10 @@ const Studentdata = () => {
         );
       }
     };
-
+ 
     fetchStudents();
   }, []);
-
+ 
   const filteredStudents = students.filter(student => {
     return (
       (schoolNameFilter === "" || student.School_Name === schoolNameFilter) &&
@@ -49,18 +48,18 @@ const Studentdata = () => {
       (locationIdFilter === "" || student.Location_ID === locationIdFilter)
     );
   });
-
+ 
   const pageCount = Math.ceil(filteredStudents.length / pageSize);
-
+ 
   const handlePageClick = (page) => {
     setCurrentPage(page);
   };
-
+ 
   const slicedStudents = filteredStudents.slice(
     (currentPage - 1) * pageSize,
     currentPage * pageSize
   );
-
+ 
   return (
     <>
       <Header />
@@ -71,7 +70,6 @@ const Studentdata = () => {
               <CardHeader className="bg-transparent pb-2">
                 <div className="text-muted text-center mt-2 mb-2">
                   <h1>School Data</h1>
-<<<<<<< Updated upstream
                 </div>
                 <div className="d-flex justify-content-between mb-3">
                   <Input
@@ -107,8 +105,6 @@ const Studentdata = () => {
                       <option key={id} value={id}>{id}</option>
                     ))}
                   </Input>
-=======
->>>>>>> Stashed changes
                 </div>
               </CardHeader>
               <Table
@@ -182,9 +178,5 @@ const Studentdata = () => {
     </>
   );
 };
-
+ 
 export default Studentdata;
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
