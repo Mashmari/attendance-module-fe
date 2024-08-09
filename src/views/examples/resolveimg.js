@@ -114,7 +114,12 @@ const Resolveimg = () => {
             <Card className="bg-secondary shadow border-0">
               <CardHeader className="bg-transparent pb-2">
                 <div className="text-muted text-center mt-2 mb-2">
-                  <h1>Enter Student Details</h1>
+                <div className="text-muted text-center mt-2 mb-2">
+                  
+                  <h1 style={{ color: '#50085e' }}> Enroll Student</h1>
+                    
+                  </div>
+                  {/* <h1>Enroll Student </h1> */}
                 </div>
               </CardHeader>
               <CardBody className="px-lg-2 py-lg-2">

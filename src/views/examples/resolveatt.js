@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import {
   Card,
@@ -10,74 +11,40 @@ import {
   PaginationItem,
   PaginationLink,
   Input,
+  Spinner,
+  Button,
 } from "reactstrap";
 import Header from "components/Headers/Header.js";
 import axios from "axios";
 import moment from "moment";
-import Select from 'react-select';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
 
 const SchoolImageData = () => {
-  const [data, setData] = useState([]);
+  const [students, setStudents] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [schoolOptions, setSchoolOptions] = useState([]);
-  const [classOptions, setClassOptions] = useState([]);
-  const [selectedSchool, setSelectedSchool] = useState(null);
-  const [selectedClass, setSelectedClass] = useState(null);
-  const [studentSearch, setStudentSearch] = useState("");
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [schoolNameFilter, setSchoolNameFilter] = useState("");
+  const [classNameFilter, setClassNameFilter] = useState("");
+  const [studentNameFilter, setStudentNameFilter] = useState("");
   const pageSize = 10;
-
-  useEffect(() => {
-    const fetchOptions = async () => {
-      try {
-        const schoolResponse = await axios.get("http://localhost:8080/api/mamSchoolStudent/get");
-        const classResponse = await axios.get("http://localhost:8080/api/mamSchoolStudent/get");
-
-        setSchoolOptions(schoolResponse.data.map(school => ({
-          value: school.School_Name,
-          label: school.School_Name,
-        })));
-        
-        setClassOptions(classResponse.data.map(cls => ({
-          value: cls.Class_Name,
-          label: cls.Class_Name,
-        })));
-      } catch (error) {
-        console.error("Error fetching options:", error);
-      }
-    };
-
-    fetchOptions();
-  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(
-          "http://localhost:8080/api/mamSchoolStudent/get",
-          {
-            params: {
-              page: currentPage,
-              limit: pageSize,
-              school: selectedSchool?.value || '',
-              class: selectedClass?.value || '',
-              studentName: studentSearch,
-              date: selectedDate ? moment(selectedDate).format("YYYY-MM-DD") : '',
-            },
-          }
-        );
+        const response = await axios.get("http://localhost:8080/api/mamSchoolStudent/get", {
+          params: {
+            page: currentPage,
+            limit: pageSize,
+          },
+        });
 
         if (response.data && Array.isArray(response.data.images)) {
-          setData(response.data.images);
+          setStudents(response.data.images);
           setTotalPages(response.data.totalPages || 1);
         } else {
-          setData([]);
+          setStudents([]);
           setTotalPages(1);
         }
       } catch (error) {
@@ -88,10 +55,20 @@ const SchoolImageData = () => {
     };
 
     fetchData();
-  }, [currentPage, selectedSchool, selectedClass, studentSearch, selectedDate]);
+  }, [currentPage]);
+
+  const filteredStudents = students.filter(student => {
+    return (
+      (schoolNameFilter === "" || student.School_Name === schoolNameFilter) &&
+      (classNameFilter === "" || student.Class_Name === classNameFilter) &&
+      (studentNameFilter === "" || student.StudentName.toLowerCase().includes(studentNameFilter.toLowerCase()))
+    );
+  });
+
+  const pageCount = Math.ceil(filteredStudents.length / pageSize);
 
   const handlePageClick = (page) => {
-    if (page > 0 && page <= totalPages) {
+    if (page > 0 && page <= pageCount) {
       setCurrentPage(page);
     }
   };
@@ -107,6 +84,11 @@ const SchoolImageData = () => {
     );
   };
 
+  const slicedStudents = filteredStudents.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
   return (
     <>
       <Header />
@@ -115,117 +97,135 @@ const SchoolImageData = () => {
           <div className="col">
             <Card className="bg-secondary shadow border-0">
               <CardHeader className="bg-transparent pb-2">
-                <div className="text-muted text-center mt-2 mb-2">
-                  <h1>School Image Data</h1>
+                <div className="d-flex justify-content-between align-items-center">
+                  <h1 style={{ color: '#50085e' }}>Student Roster</h1>
+                  <Button color="primary" href="/admin/addstudent" style={{ marginLeft: "15px" }}>
+                    Add Student
+                  </Button>
+                </div>
+                <div className="d-flex justify-content-between mb-3 mt-3">
+                  <Input
+                    type="select"
+                    value={schoolNameFilter}
+                    onChange={(e) => setSchoolNameFilter(e.target.value)}
+                    style={{ width: "30%" }}
+                  >
+                    <option value="">All School Names</option>
+                    {Array.from(new Set(students.map(student => student.School_Name))).map((name) => (
+                      <option key={name} value={name}>{name}</option>
+                    ))}
+                  </Input>
+                  <Input
+                    type="select"
+                    value={classNameFilter}
+                    onChange={(e) => setClassNameFilter(e.target.value)}
+                    style={{ width: "30%" }}
+                  >
+                    <option value="">All Class Names</option>
+                    {Array.from(new Set(students.map(student => student.Class_Name))).map((name) => (
+                      <option key={name} value={name}>{name}</option>
+                    ))}
+                  </Input>
+                  <Input
+                    type="text"
+                    placeholder="Search by Student Name"
+                    value={studentNameFilter}
+                    onChange={(e) => setStudentNameFilter(e.target.value)}
+                    style={{ width: "30%" }}
+                  />
                 </div>
               </CardHeader>
-              <CardBody style={{ padding: '2rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <div style={{ width: '200px' }}>
-                    <Select
-                      options={schoolOptions}
-                      onChange={setSelectedSchool}
-                      placeholder="Select School"
-                      styles={{
-                        container: (provided) => ({
-                          ...provided,
-                          width: '100%',
-                        }),
-                      }}
-                    />
+              <CardBody style={{ padding: '0rem' }}>
+                <div
+                  style={{
+                    maxHeight: '400px',
+                    overflowY: 'auto',
+                    position: 'relative',
+                    border: '1px solid #ddd',
+                  }}
+                >
+                  <div
+                    style={{
+                      position: 'sticky',
+                      top: 0,
+                      backgroundColor: '#f8f9fa',
+                      zIndex: 1,
+                    }}
+                  >
+                    <Table
+                      className="align-items-center table-flush custom-table"
+                      responsive
+                      style={{ marginTop: '0rem', borderCollapse: 'collapse' }}
+                    >
+                      <thead className="thead-light">
+                        <tr>
+                          <th scope="col" style={{ width: "10%", color: "purple", whiteSpace: 'normal', textAlign: 'left' }}>
+                            School Name
+                          </th>
+                          <th scope="col" style={{ width: "15%", color: "purple", whiteSpace: 'normal', wordBreak: 'break-word', textAlign: 'left' }}>
+                            Class Name
+                          </th>
+                          <th scope="col" style={{ width: "13%", color: "purple", whiteSpace: 'normal', wordBreak: 'break-word', textAlign: 'left' }}>
+                            Student ID
+                          </th>
+                          <th scope="col" style={{ width: "15%", color: "purple", textAlign: 'left' }}>
+                            Name
+                          </th>
+                          <th scope="col" style={{ width: "10%", color: "purple", whiteSpace: 'normal', textAlign: 'left' }}>
+                            Image Filename
+                          </th>
+                          <th scope="col" style={{ width: "10%", color: "purple", whiteSpace: 'normal', wordBreak: 'break-word', textAlign: 'left' }}>
+                            Create Date & Time
+                          </th>
+                          <th scope="col" style={{ width: "20%", color: "purple", whiteSpace: 'normal', wordBreak: 'break-word', textAlign: 'left' }}>
+                            Location ID
+                          </th>
+                        </tr>
+                      </thead>
+                    </Table>
                   </div>
-                  <div style={{ width: '200px' }}>
-                    <Select
-                      options={classOptions}
-                      onChange={setSelectedClass}
-                      placeholder="Select Class"
-                      styles={{
-                        container: (provided) => ({
-                          ...provided,
-                          width: '100%',
-                        }),
-                      }}
-                    />
-                  </div>
-                  <div style={{ width: '200px' }}>
-                    <Input
-                      type="text"
-                      placeholder="Search for student name"
-                      value={studentSearch}
-                      onChange={(e) => setStudentSearch(e.target.value)}
-                      style={{ width: '100%' }}
-                    />
-                  </div>
-                  <div style={{ width: '200px' }}>
-                    <DatePicker
-                      selected={selectedDate}
-                      onChange={date => setSelectedDate(date)}
-                      placeholderText="Select Date"
-                      className="form-control"
-                      style={{ width: '100%' }}
-                    />
+                  <div>
+                    <Table
+                      className="align-items-center table-flush custom-table"
+                      responsive
+                      style={{ marginTop: '0rem', borderCollapse: 'collapse', marginBottom: 0, borderSpacing: '0', borderCollapse: 'collapse', tableLayout: 'fixed' }}
+                    >
+                      <tbody>
+                        {loading ? (
+                          <tr>
+                            <td colSpan="7" className="text-center">
+                              <Spinner type="grow" color="primary" />
+                            </td>
+                          </tr>
+                        ) : error ? (
+                          <tr>
+                            <td colSpan="7" className="text-center text-danger">
+                              {error}
+                            </td>
+                          </tr>
+                        ) : slicedStudents.length > 0 ? (
+                          slicedStudents.map((item) => (
+                            <tr key={item.Student_ID}>
+                              <td style={{ whiteSpace: 'normal', wordBreak: 'break-word', textAlign: 'left', padding: '4px' }}>{item.School_Name}</td>
+                              <td style={{ whiteSpace: 'normal', wordBreak: 'break-word', textAlign: 'left', padding: '4px' }}>{item.Class_Name}</td>
+                              <td style={{ whiteSpace: 'normal', wordBreak: 'break-word', textAlign: 'left', padding: '4px' }}>{item.Student_ID}</td>
+                              <td style={{ whiteSpace: 'normal', wordBreak: 'break-word', textAlign: 'left', padding: '6px' }}>{item.StudentName}</td>
+                              <td style={{ whiteSpace: 'normal', wordBreak: 'break-word', textAlign: 'left', padding: '4px' }}>{item.Ref_Image_filename}</td>
+                              <td style={{ whiteSpace: 'normal', wordBreak: 'break-word', textAlign: 'left', padding: '8px' }}>{formatDate(item.Ref_Image_Create_DateTime)}</td>
+                              <td style={{ whiteSpace: 'normal', wordBreak: 'break-word', textAlign: 'left', padding: '4px' }}>{item.Location_ID}</td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan="7" className="text-center">
+                              No data available
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </Table>
                   </div>
                 </div>
-                <Table className="align-items-center table-flush" responsive style={{ marginTop: '2rem' }}>
-                  <thead className="thead-light">
-                    <tr>
-                      <th scope="col" style={{ width: "8%", color: "purple" }}>
-                        School Name
-                      </th>
-                      <th scope="col" style={{ width: "8%", color: "purple" }}>
-                        Class Name
-                      </th>
-                      <th scope="col" style={{ width: "10%", color: "purple" }}>
-                        Student ID
-                      </th>
-                      <th scope="col" style={{ width: "10%", color: "purple" }}>
-                        Name
-                      </th>
-                      <th scope="col" style={{ width: "10%", color: "purple" }}>
-                        Image Filename
-                      </th>
-                      <th scope="col" style={{ width: "15%", color: "purple" }}>
-                        Create Date & Time
-                      </th>
-                      <th scope="col" style={{ width: "8%", color: "purple" }}>
-                        Location ID
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {loading ? (
-                      <tr>
-                        <td colSpan="7" className="text-center">
-                          Loading...
-                        </td>
-                      </tr>
-                    ) : error ? (
-                      <tr>
-                        <td colSpan="7" className="text-center text-danger">
-                          {error}
-                        </td>
-                      </tr>
-                    ) : data.length > 0 ? (
-                      data.map((item) => (
-                        <tr key={item.Student_ID}>
-                          <td>{item.School_Name}</td>
-                          <td>{item.Class_Name}</td>
-                          <td>{item.Student_ID}</td>
-                          <td>{item.StudentName}</td>
-                          <td>{item.Ref_Image_filename}</td>
-                          <td>{formatDate(item.Ref_Image_Create_DateTime)}</td>
-                          <td>{item.Location_ID}</td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="7" className="text-center">
-                          No data available
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </Table>
                 <Pagination className="justify-content-end mt-3">
                   <PaginationItem disabled={currentPage === 1}>
                     <PaginationLink
@@ -233,8 +233,8 @@ const SchoolImageData = () => {
                       onClick={() => handlePageClick(currentPage - 1)}
                     />
                   </PaginationItem>
-                  {totalPages > 0 &&
-                    [...Array(totalPages)].map((_, index) => (
+                  {pageCount > 0 &&
+                    [...Array(pageCount)].map((_, index) => (
                       <PaginationItem
                         active={index + 1 === currentPage}
                         key={index}
@@ -244,7 +244,7 @@ const SchoolImageData = () => {
                         </PaginationLink>
                       </PaginationItem>
                     ))}
-                  <PaginationItem disabled={currentPage === totalPages}>
+                  <PaginationItem disabled={currentPage === pageCount}>
                     <PaginationLink
                       next
                       onClick={() => handlePageClick(currentPage + 1)}

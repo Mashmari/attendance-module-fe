@@ -1,0 +1,7 @@
+.fixed-header-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: white; /* Adjust this color to match your header background */
+  }
+  

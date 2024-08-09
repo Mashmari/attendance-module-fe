@@ -10,6 +10,7 @@ import Studentdata from "views/examples/Studentdata";
 import Resolveatt from "views/examples/resolveatt.js";
 import Sidebar from "components/Sidebar/Sidebar";
 import Testattendance from "views/examples/testattendance";
+import AddStudent from "views/examples/Addstudent";
 
 var routes = [
   {
@@ -34,6 +35,14 @@ var routes = [
     icon: "ni ni-settings",
     component: <Resolveatt />,
     layout: "/admin",
+  },
+  {
+    path: "/addstudent",
+    name: "Add Student",
+    icon: "ni ni-settings",
+    component: <AddStudent />,
+    layout: "/admin",
+    hidden: true
   },
   {
     path: "/tables",

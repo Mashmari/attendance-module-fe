@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import {
   Badge,
@@ -12,56 +13,53 @@ import {
   Table,
   Container,
   Row,
-  Dropdown,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem,
+  Col,
+  Input,
+  Modal,
+  ModalBody,
+  ModalHeader,
 } from "reactstrap";
 import Header from "components/Headers/Header.js";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const Tables = () => {
   const [students, setStudents] = useState([]);
-  const [statusFilter, setStatusFilter] = useState("All Records");
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("");
+  const [startDate, setStartDate] = useState(new Date()); // Set default to current date
+  const [endDate, setEndDate] = useState(new Date()); // Set default to current date
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [modal, setModal] = useState(false);
+  const [modalImage, setModalImage] = useState("");
 
-  const toggleDropdown = () => setDropdownOpen((prevState) => !prevState);
-
-  async function getData(page = 1, limit = 10) {
+  const getData = async (page = 1, limit = 10) => {
     const response = await axios.get(`http://localhost:8080/mam/get?page=${page}&limit=${limit}`);
-    console.log(response);
     if (response.data.records.length !== 0) {
       const studentsWithImages = await Promise.all(
-        response.data.records.map(async student => {
+        response.data.records.map(async (student) => {
           const imageResponse = await axios.get('http://localhost:8080/image', {
             params: { path: student.imageUrl },
             responseType: 'blob',
           });
-          console.log(imageResponse.data);
           const imageUrl = URL.createObjectURL(imageResponse.data);
           return { ...student, imageUrl };
         })
       );
-      //  setStudents(response.data.records);
-      //  console.log(response.data.records);
       setStudents(studentsWithImages);
       setTotalPages(response.data.totalPages);
     }
-  }
+  };
 
   useEffect(() => {
     getData(currentPage);
-  }, [currentPage, statusFilter]);
+  }, [currentPage, statusFilter, startDate, endDate]);
 
   const formatTimestamp = (timestamp) => {
     const date = new Date(timestamp);
-    const formattedDate = date
-      .toLocaleDateString("en-GB")
-      .split("-")
-      .join("");
+    const formattedDate = date.toLocaleDateString("en-GB").split("-").join("");
     const formattedTime = date.toLocaleTimeString("en-GB", {
       hour: "2-digit",
       minute: "2-digit",
@@ -74,8 +72,11 @@ const Tables = () => {
   };
 
   const filteredStudents = students.filter((student) => {
-    if (statusFilter === "All Records") return true;
-    return student.match_outcome === statusFilter;
+    if (statusFilter && student.match_outcome !== statusFilter) return false;
+    const studentDate = new Date(student.Upload_timestamp).toDateString();
+    if (startDate && studentDate < new Date(startDate).toDateString()) return false;
+    if (endDate && studentDate > new Date(endDate).toDateString()) return false;
+    return true;
   });
 
   const handlePageChange = (page) => {
@@ -84,47 +85,107 @@ const Tables = () => {
     }
   };
 
+  const toggleModal = (imageUrl = "") => {
+    setModalImage(imageUrl);
+    setModal(!modal);
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Positive":
+        return "green";
+      case "Negative":
+        return "yellow";
+      case "Spoof":
+        return "red";
+      default:
+        return "";
+    }
+  };
+
   return (
     <>
       <Header />
-      {/* Page content */}
       <Container className="mt--7" fluid>
-        {/* Filter Dropdown */}
-        <Row className="mb-3">
-          <div className="col">
-            <Dropdown isOpen={dropdownOpen} toggle={toggleDropdown}>
-              <DropdownToggle caret>Status: {statusFilter}</DropdownToggle>
-              <DropdownMenu>
-                <DropdownItem onClick={() => setStatusFilter("All Records")}>
-                  All Records
-                </DropdownItem>
-                <DropdownItem onClick={() => setStatusFilter("Pass")}>
-                  Pass
-                </DropdownItem>
-                <DropdownItem onClick={() => setStatusFilter("Fail")}>
-                  Fail
-                </DropdownItem>
-              </DropdownMenu>
-            </Dropdown>
-          </div>
-        </Row>
-        {/* Table */}
         <Row>
           <div className="col">
             <Card className="shadow">
               <CardHeader className="border-0">
-                <h3 className="mb-0">Total Students</h3>
+                <div className="text-muted text-center mt-2 mb-2">
+                  <h1 style={{ color: '#50085e' }}>Daily Attendance</h1>
+                </div>
+                <Row className="mb-3" style={{ marginTop: "20px" }}>
+                  <Col md="3">
+                    <Input
+                      type="select"
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                      style={{ width: "100%" }}
+                    >
+                      <option value="">All Status</option>
+                      <option value="Positive">Positive</option>
+                      <option value="Negative">Negative</option>
+                      <option value="Spoof">Spoof</option>
+                    </Input>
+                  </Col>
+                  <Col md="3" style={{ position: "relative" }}>
+                    <label style={{
+                      position: "absolute",
+                      top: "-10px",
+                      left: "20px",
+                      fontSize: "0.85rem",
+                      color: "#50085e",
+                      zIndex: 1,
+                      background: "white",
+                      padding: "0 5px"
+                    }}>
+                      Start Date
+                    </label>
+                    <DatePicker
+                      selected={startDate}
+                      onChange={(date) => setStartDate(date)}
+                      dateFormat="yyyy-MM-dd"
+                      placeholderText="Select Start Date"
+                      className="form-control"
+                      maxDate={new Date()}
+                      style={{ width: "100%" }}
+                    />
+                  </Col>
+                  <Col md="3" style={{ position: "relative" }}>
+                    <label style={{
+                      position: "absolute",
+                      top: "-10px",
+                      left: "20px",
+                      fontSize: "0.85rem",
+                      color: "#50085e",
+                      zIndex: 1,
+                      background: "white",
+                      padding: "0 5px"
+                    }}>
+                      End Date
+                    </label>
+                    <DatePicker
+                      selected={endDate}
+                      onChange={(date) => setEndDate(date)}
+                      dateFormat="yyyy-MM-dd"
+                      placeholderText="Select End Date"
+                      className="form-control"
+                      maxDate={new Date()}
+                      style={{ width: "100%" }}
+                    />
+                  </Col>
+                </Row>
               </CardHeader>
               <Table className="align-items-center table-flush" responsive>
                 <thead className="thead-light">
                   <tr>
-                    <th scope="col">Image</th>
-                    <th scope="col">School Name</th>
-                    <th scope="col">Student Id</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Date & Time</th>
-                    <th scope="col">Location</th>
-                    
+                    <th scope="col" style={{ color: '#50085e' }}>Image</th>
+                    <th scope="col" style={{ color: '#50085e' }}>School Name</th>
+                    <th scope="col" style={{ color: '#50085e' }}>Student Id</th>
+                    <th scope="col" style={{ color: '#50085e' }}>Status</th>
+                    <th scope="col" style={{ color: '#50085e' }}>Date & Time</th>
+                    <th scope="col" style={{ color: '#50085e' }}>Location</th>
+                    <th scope="col" style={{ color: '#50085e' }}>Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -147,6 +208,7 @@ const Tables = () => {
                                 height: "auto",
                                 border: "1px solid #ccc",
                                 borderRadius: 5,
+                                cursor: "pointer",
                               }}
                               onMouseOver={(e) => {
                                 e.currentTarget.style.transform = "scale(1.2)";
@@ -154,6 +216,7 @@ const Tables = () => {
                               onMouseOut={(e) => {
                                 e.currentTarget.style.transform = "scale(1)";
                               }}
+                              onClick={() => toggleModal(student.imageUrl)}
                             />
                           </div>
                         </Media>
@@ -172,10 +235,10 @@ const Tables = () => {
                           </span>
                         </Media>
                       </td>
-
                       <td>
-                        <Badge color="" className="badge-dot mr-4">
-                          <i className="bg-warning" />
+                        <Badge color="" className="badge-dot mr-4" style={{ color: getStatusColor(student.match_outcome) }}>
+                          {/* <i className="bg-" /> */}
+                          {/* warning */}
                           {student.match_outcome}
                         </Badge>
                       </td>
@@ -187,19 +250,17 @@ const Tables = () => {
                       </td>
                       <td className="text-right">
                         <div className="text-center">
-                          {student.match_outcome === "Negative" && student.Status_Pending === "Yes" ? (
-                           <
-                           Link to=
-                           {
-                           `/admin/resolveimg?id=${
-                           student.id
-                           }&timestamp=${
-                           formatTimestamp(student.Upload_timestamp)
-                           }&imagePath=${
-                           student.imageUrl
-                           }`
-                           }
-                           >
+                          {student.match_outcome === "Spoof" ? (
+                            <i
+                              className="fas fa-times"
+                              style={{
+                                color: "red",
+                                fontSize: "24px",
+                                marginTop: "16px",
+                              }}
+                            ></i>
+                          ) : student.match_outcome === "Negative" && student.Status_Pending === "Yes" ? (
+                            <Link to={`/admin/resolveimg?id=${student.id}&timestamp=${formatTimestamp(student.Upload_timestamp)}&imagePath=${student.imageUrl}`}>
                               <Button
                                 className="mt-4"
                                 color="primary"
@@ -272,6 +333,12 @@ const Tables = () => {
           </div>
         </Row>
       </Container>
+      <Modal isOpen={modal} toggle={toggleModal}>
+        <ModalHeader toggle={toggleModal} className="border-0"></ModalHeader>
+        <ModalBody>
+          <img src={modalImage} alt="Modal" style={{ width: "100%" }} />
+        </ModalBody>
+      </Modal>
     </>
   );
 };
