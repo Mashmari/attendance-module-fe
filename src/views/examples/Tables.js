@@ -40,7 +40,7 @@ const Tables = () => {
     if (response.data.records.length !== 0) {
       const studentsWithImages = await Promise.all(
         response.data.records.map(async (student) => {
-          const imageResponse = await axios.get('http://localhost:8080/image', {
+          const imageResponse = await axios.get(`http://localhost:8080/image`, {
             params: { path: student.imageUrl },
             responseType: 'blob',
           });
@@ -71,11 +71,21 @@ const Tables = () => {
     return value.toFixed(6);
   };
 
+
+  const getDateOnly = (date) => {
+    const d = new Date(date);
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  };
   const filteredStudents = students.filter((student) => {
     if (statusFilter && student.match_outcome !== statusFilter) return false;
-    const studentDate = new Date(student.Upload_timestamp).toDateString();
-    if (startDate && studentDate < new Date(startDate).toDateString()) return false;
-    if (endDate && studentDate > new Date(endDate).toDateString()) return false;
+  
+    const studentDate = getDateOnly(student.Upload_timestamp);
+    const startDateOnly = startDate ? getDateOnly(startDate) : null;
+    const endDateOnly = endDate ? getDateOnly(endDate) : null;
+  
+    if (startDateOnly && studentDate < startDateOnly) return false;
+    if (endDateOnly && studentDate > endDateOnly) return false;
+  
     return true;
   });
 
@@ -95,9 +105,9 @@ const Tables = () => {
       case "Positive":
         return "green";
       case "Negative":
-        return "yellow";
-      case "Spoof":
         return "red";
+      case "Spoof":
+        return "yellow";
       default:
         return "";
     }
@@ -181,16 +191,16 @@ const Tables = () => {
                   <tr>
                     <th scope="col" style={{ color: '#50085e' }}>Image</th>
                     <th scope="col" style={{ color: '#50085e' }}>School Name</th>
+                    <th scope="col" style={{ color: '#50085e' }}>Class Name</th>
                     <th scope="col" style={{ color: '#50085e' }}>Student Id</th>
                     <th scope="col" style={{ color: '#50085e' }}>Status</th>
-                    <th scope="col" style={{ color: '#50085e' }}>Date & Time</th>
-                    <th scope="col" style={{ color: '#50085e' }}>Location</th>
+                    <th scope="col" style={{ color: '#50085e' }}>Captured on</th>
                     <th scope="col" style={{ color: '#50085e' }}>Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredStudents.map((student) => (
-                    <tr key={student.id}>
+                    <tr key={student.Matched_User_ID}>
                       <td>
                         <Media className="align-items-center">
                           <div
@@ -224,14 +234,21 @@ const Tables = () => {
                       <td>
                         <Media>
                           <span className="mb-0 text-sm">
-                            Mashmari School
+                          {student.School_Name}
                           </span>
                         </Media>
                       </td>
                       <td>
                         <Media>
                           <span className="mb-0 text-sm">
-                            {student.id}
+                          {student.Class_Name}
+                          </span>
+                        </Media>
+                      </td>
+                      <td>
+                        <Media>
+                          <span className="mb-0 text-sm">
+                            {student.Matched_User_ID}
                           </span>
                         </Media>
                       </td>
@@ -244,9 +261,6 @@ const Tables = () => {
                       </td>
                       <td>
                         {formatTimestamp(student.Upload_timestamp)}
-                      </td>
-                      <td>
-                        ({formatCoordinates(student.Latitude)}, {formatCoordinates(student.Longitude)})
                       </td>
                       <td className="text-right">
                         <div className="text-center">
@@ -343,4 +357,4 @@ const Tables = () => {
   );
 };
 
-export default Tables;
+ export default Tables;

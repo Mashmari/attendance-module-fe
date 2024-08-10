@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import {
   Button,
@@ -17,28 +16,51 @@ import Header from "components/Headers/Header.js";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useNavigate } from "react-router-dom"; // Update import to useNavigate
 
 const AddStudent = () => {
   const [schools, setSchools] = useState([]);
   const [classes, setClasses] = useState([]);
   const [selectedSchool, setSelectedSchool] = useState("");
   const [selectedClass, setSelectedClass] = useState("");
-  const [studentName, setStudentName] = useState("");
+  const [StudentName, setStudentName] = useState("");
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState("");
+  const [loading, setLoading] = useState(false); // New state for loading
+  const navigate = useNavigate(); // Use useNavigate instead of useHistory
 
   useEffect(() => {
+    // Fetch the list of distinct schools on component mount
     axios
-      .get("http://localhost:8080/api/mamschool/get")
+      .get("http://localhost:8080/api/mamSchoolStudent/getAllSchoolNames")
       .then((response) => {
-        const data = response.data;
-        setSchools(data.map((item) => item.School_Name));
-        setClasses(data.map((item) => item.Class_Name));
+        const data = response.data.schools;
+        setSchools(data);
       })
       .catch((error) => {
-        toast.error("Failed to fetch school and class data.");
+        toast.error("Failed to fetch school names.");
+        console.error("Error fetching school names:", error);
       });
   }, []);
+
+  useEffect(() => {
+    if (selectedSchool) {
+      axios
+        .post("http://localhost:8080/api/mamSchoolStudent/getClassesBySchoolName", {
+          School_Name: selectedSchool,
+        })
+        .then((response) => {
+          const data = response.data.classes;
+          setClasses(data);
+        })
+        .catch((error) => {
+          toast.error("Failed to fetch class names.");
+          console.error("Error fetching class names:", error);
+        });
+    } else {
+      setClasses([]); // Clear classes if no school is selected
+    }
+  }, [selectedSchool]);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -48,30 +70,45 @@ const AddStudent = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    if (!selectedSchool || !selectedClass || !studentName || !image) {
+  
+    if (!selectedSchool || !selectedClass || !StudentName || !image) {
       toast.error("Please fill in all fields.");
       return;
     }
-
+  
+    setLoading(true); // Set loading to true when submitting
+  
     const formData = new FormData();
-    formData.append("schoolName", selectedSchool);
-    formData.append("className", selectedClass);
-    formData.append("studentName", studentName);
+    formData.append("School_Name", selectedSchool);
+    formData.append("Class_Name", selectedClass);
+    formData.append("StudentName", StudentName);
     formData.append("image", image);
-
+  
     axios
-      .post(
-        "http://localhost:8080/api/mamSchoolStudent/createStudentWithImage",
-        formData
-      )
+      .post("http://localhost:8080/api/mamSchoolStudent/createStudentWithImage", formData)
       .then((response) => {
         toast.success("Student added successfully!");
+        // Clear form fields on success
+        setSelectedSchool("");
+        setSelectedClass("");
+        setStudentName("");
+        setImage(null);
+        setPreview("");
+  
+        // Delay navigation by 3 seconds
+        setTimeout(() => {
+          navigate("/admin/resolveatt"); // Redirect to /admin/resolveatt using useNavigate
+        }, 3000);
       })
       .catch((error) => {
         toast.error("Failed to add student.");
+        console.error("Error adding student:", error);
+      })
+      .finally(() => {
+        setLoading(false); // Reset loading state
       });
   };
+  
 
   return (
     <>
@@ -118,6 +155,7 @@ const AddStudent = () => {
                             onClick={() =>
                               document.getElementById("studentImage").click()
                             }
+                            disabled={loading} // Disable button when loading
                           >
                             Choose File
                           </Button>
@@ -126,6 +164,7 @@ const AddStudent = () => {
                             id="studentImage"
                             onChange={handleImageChange}
                             style={{ display: "none" }}
+                            disabled={loading} // Disable input when loading
                           />
                         </div>
                       </FormGroup>
@@ -140,6 +179,7 @@ const AddStudent = () => {
                           id="schoolSelect"
                           value={selectedSchool}
                           onChange={(e) => setSelectedSchool(e.target.value)}
+                          disabled={loading} // Disable select when loading
                         >
                           <option value="" disabled>
                             Select School
@@ -160,6 +200,7 @@ const AddStudent = () => {
                           id="classSelect"
                           value={selectedClass}
                           onChange={(e) => setSelectedClass(e.target.value)}
+                          disabled={!selectedSchool || loading} // Disable select when no school is selected or loading
                         >
                           <option value="" disabled>
                             Select Class
@@ -179,12 +220,13 @@ const AddStudent = () => {
                           type="text"
                           id="studentName"
                           placeholder="Enter student name"
-                          value={studentName}
+                          value={StudentName}
                           onChange={(e) => setStudentName(e.target.value)}
+                          disabled={loading} // Disable input when loading
                         />
                       </FormGroup>
-                      <Button color="primary" type="submit">
-                        Add Student
+                      <Button color="primary" type="submit" disabled={loading}>
+                        {loading ? "Adding..." : "Add Student"}
                       </Button>
                     </Col>
                   </Row>

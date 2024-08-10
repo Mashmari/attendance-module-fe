@@ -24,7 +24,7 @@ const Studentdata = () => {
   const pageSize = 10;
 
   useEffect(() => {
-    const fetchStudents = async () => {
+    const fetchStudents = async (page = 1, limit = 10) => {
       try {
         const response = await axios.get("http://localhost:8080/api/mamschool/get");
         setStudents(response.data);
@@ -186,5 +186,3 @@ const Studentdata = () => {
 };
 
 export default Studentdata;
-
-

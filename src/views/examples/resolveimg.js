@@ -163,7 +163,7 @@ const Resolveimg = () => {
                     </div>
                     
                     <div style={{ marginBottom: 8 }}>
-                      <label htmlFor="id" style={{ color: "purple", fontWeight: "bold" }}>Student ID:</label>
+                      {/* <label htmlFor="id" style={{ color: "purple", fontWeight: "bold" }}>Student ID:</label> */}
                       <input
                         type="text"
                         id="Id"
@@ -173,6 +173,7 @@ const Resolveimg = () => {
                         className="form-control"
                         readOnly
                         required
+                        hidden
                       />
                     </div>
 
