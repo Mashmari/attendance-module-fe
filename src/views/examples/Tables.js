@@ -1,4 +1,4 @@
-
+// this js file is for Daily Attendance page.
 import React, { useEffect, useState } from "react";
 import {
   Badge,

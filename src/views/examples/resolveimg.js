@@ -1,3 +1,4 @@
+// this js file is for Enroll Student page.
 import React, { useEffect, useState } from "react";
 import {
   Badge,

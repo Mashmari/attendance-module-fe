@@ -1,3 +1,7 @@
+// this js file for the Add Student Page.
+
+
+
 import React, { useEffect, useState } from "react";
 import {
   Button,

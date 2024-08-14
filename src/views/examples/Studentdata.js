@@ -1,4 +1,4 @@
-
+// this js file is for School Data page.
 
 import React, { useState, useEffect } from "react";
 import {
