@@ -16,6 +16,7 @@ import {
   Col,
   Input,
   Modal,
+  ModalFooter,
   ModalBody,
   ModalHeader,
 } from "reactstrap";
@@ -34,8 +35,12 @@ const Tables = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [modal, setModal] = useState(false);
   const [modalImage, setModalImage] = useState("");
-
+    const [errorModal, setErrorModal] = useState(false);  // Error modal state
+    const [errorMessage, setErrorMessage] = useState("");  // Error message state
+  //  const getData = async (page = 1, limit = 10) => {
+  
   const getData = async (page = 1, limit = 10) => {
+ try {
     const response = await axios.get(`http://localhost:8080/mam/get?page=${page}&limit=${limit}`);
     if (response.data.records.length !== 0) {
       const studentsWithImages = await Promise.all(
@@ -51,6 +56,10 @@ const Tables = () => {
       setStudents(studentsWithImages);
       setTotalPages(response.data.totalPages);
     }
+} catch (error) {
+  setErrorMessage("Something went wrong. Please try again.");
+  setErrorModal(true);  // Trigger error modal on error
+}
   };
 
   useEffect(() => {
@@ -99,6 +108,9 @@ const Tables = () => {
     setModalImage(imageUrl);
     setModal(!modal);
   };
+const toggleErrorModal = () => {
+  setErrorModal(!errorModal);
+};
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -353,8 +365,18 @@ const Tables = () => {
           <img src={modalImage} alt="Modal" style={{ width: "100%" }} />
         </ModalBody>
       </Modal>
+{/* Error Modal */}
+<Modal isOpen={errorModal} toggle={toggleErrorModal}>
+<ModalHeader toggle={toggleErrorModal} >Error</ModalHeader>
+<ModalBody>{errorMessage}</ModalBody>
+<ModalFooter>
+  <Button color="primary" onClick={toggleErrorModal}>OK</Button>
+</ModalFooter>
+</Modal>
     </>
   );
 };
 
  export default Tables;
+
+
