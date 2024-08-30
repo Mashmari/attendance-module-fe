@@ -13,6 +13,10 @@ import {
   Input,
   Spinner,
   Button,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
 } from "reactstrap";
 import Header from "components/Headers/Header.js";
 import axios from "axios";
@@ -24,10 +28,14 @@ const SchoolImageData = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [errorModal, setErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [schoolNameFilter, setSchoolNameFilter] = useState("");
   const [classNameFilter, setClassNameFilter] = useState("");
   const [studentNameFilter, setStudentNameFilter] = useState("");
   const pageSize = 10;
+
+  const toggleErrorModal = () => setErrorModal(!errorModal);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -49,6 +57,8 @@ const SchoolImageData = () => {
         }
       } catch (error) {
         setError(error.message);
+        setErrorMessage("Something went wrong. Please try again later.");
+        setErrorModal(true); // Show the error modal
       } finally {
         setLoading(false);
       }
@@ -133,87 +143,69 @@ const SchoolImageData = () => {
                 </div>
               </CardHeader>
               <CardBody style={{ padding: "0rem" }}>
-                <div style={{ position: "relative" }}>
-                  <div
-                    style={{
-                      position: "sticky",
-                      top: "0",
-                      backgroundColor: "#fff",
-                      zIndex: "1",
-                      borderBottom: "2px solid #ddd",
-                    }}
-                  >
-                    <Table className="align-items-center table-flush custom-table" responsive>
-                      <thead className="thead-light">
+                <div style={{ maxHeight: "400px", overflowY: "auto", border: "1px solid #ddd" }}>
+                  <Table className="align-items-center table-flush custom-table" responsive>
+                    <thead className="thead-light">
+                      <tr>
+                        <th scope="col" style={{ width: "15%", textAlign: "left", color: "purple" }}>
+                          School Name
+                        </th>
+                        <th scope="col" style={{ width: "15%", textAlign: "left", color: "purple" }}>
+                          Class Name
+                        </th>
+                        <th scope="col" style={{ width: "15%", textAlign: "center", color: "purple" }}>
+                          Student ID
+                        </th>
+                        <th scope="col" style={{ width: "15%", textAlign: "left", color: "purple" }}>
+                          Name
+                        </th>
+                        <th scope="col" style={{ width: "15%", textAlign: "center", color: "purple" }}>
+                          Image Filename
+                        </th>
+                        <th scope="col" style={{ width: "20%", textAlign: "center", color: "purple" }}>
+                          Created on
+                        </th>
+                        <th scope="col" style={{ width: "15%", textAlign: "left", color: "purple" }}>
+                          Location ID
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {loading ? (
                         <tr>
-                          <th scope="col" style={{ width: "15%", textAlign: "left", color: "purple" }}>
-                            School Name
-                          </th>
-                          <th scope="col" style={{ width: "35%", textAlign: "left", color: "purple" }}>
-                            Class Name
-                          </th>
-                          <th scope="col" style={{ width: "25%", textAlign: "center", color: "purple" }}>
-                            Student ID
-                          </th>
-                          <th scope="col" style={{ width: "40%", textAlign: "center", color: "purple" }}>
-                            Name
-                          </th>
-                          <th scope="col" style={{ width: "20%", textAlign: "center", color: "purple" }}>
-                            Image Filename
-                          </th>
-                          <th scope="col" style={{ width: "20%", textAlign: "center", color: "purple" }}>
-                            Created on
-                          </th>
-                          <th scope="col" style={{ width: "10%", textAlign: "center", color: "purple" }}>
-                            Location ID
-                          </th>
+                          <td colSpan="7" className="text-center">
+                            <Spinner type="grow" color="primary" />
+                          </td>
                         </tr>
-                      </thead>
-                    </Table>
-                  </div>
-                  <div
-                    style={{
-                      maxHeight: "400px",
-                      overflowY: "auto",
-                      border: "1px solid #ddd",
-                    }}
-                  >
-                    <Table className="align-items-center table-flush custom-table" responsive>
-                      <tbody>
-                        {loading ? (
-                          <tr>
-                            <td colSpan="7" className="text-center">
-                              <Spinner type="grow" color="primary" />
+                      ) : error ? (
+                        <tr>
+                          <td colSpan="7" className="text-center text-danger">
+                            No data available
+                          </td>
+                        </tr>
+                      ) : filteredStudents.length > 0 ? (
+                        filteredStudents.map((item) => (
+                          <tr key={item.Student_ID}>
+                            <td style={{ width: "10%", padding: "8px" }}>{item.School_Name}</td>
+                            <td style={{ width: "10%", padding: "8px" }}>{item.Class_Name}</td>
+                            <td style={{ width: "10%", padding: "8px", textAlign: "center" }}>{item.Student_ID}</td>
+                            <td style={{ width: "15%", padding: "8px", textAlign: "left" }}>{item.StudentName}</td>
+                            <td style={{ width: "15%", padding: "8px", textAlign: "center" }}>{item.Ref_Image_filename}</td>
+                            <td style={{ width: "15%", padding: "8px", textAlign: "center" }}>
+                              {formatDate(item.Ref_Image_Create_DateTime)}
                             </td>
+                            <td style={{ width: "10%", padding: "8px", textAlign: "center" }}>{item.Location_ID}</td>
                           </tr>
-                        ) : error ? (
-                          <tr>
-                            <td colSpan="7" className="text-center text-danger">
-                              {error}
-                            </td>
-                          </tr>
-                        ) : filteredStudents.length > 0 ? (
-                          filteredStudents.map((item) => (
-                            <tr key={item.Student_ID}>
-                              <td style={{ width: "15%", padding: "8px" }}>{item.School_Name}</td>
-                              <td style={{ width: "15%", padding: "8px" }}>{item.Class_Name}</td>
-                              <td style={{ width: "15%", padding: "8px", textAlign: "left" }}>{item.Student_ID}</td>
-                              <td style={{ width: "15%", padding: "8px", textAlign: "left" }}>{item.StudentName}</td>
-                              <td style={{ width: "15%", padding: "8px", textAlign: "left" }}>{item.Ref_Image_filename}</td>
-                              <td style={{ width: "15%", padding: "8px", textAlign: "left" }}>{formatDate(item.Ref_Image_Create_DateTime)}</td>
-                              <td style={{ width: "10%", padding: "8px", textAlign: "left" }}>{item.Location_ID}</td>
-                            </tr>
-                          ))
-                        ) : (
-                          <tr>
-                            <td colSpan="7" className="text-center">
-                              No data available
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </Table>
-                  </div>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="7" className="text-center">
+                            No data available
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </Table>
                 </div>
                 <Pagination className="justify-content-end mt-3">
                   <PaginationItem disabled={currentPage === 1}>
@@ -233,6 +225,37 @@ const SchoolImageData = () => {
           </div>
         </Row>
       </Container>
+
+      {/* Error Modal */}
+    
+      <Modal isOpen={errorModal} toggle={toggleErrorModal} centered>
+         <ModalHeader 
+          toggle={toggleErrorModal} 
+           style={{ color: '#50085e', fontWeight: 'bold', borderBottom: '2px ' }}
+         >
+           <i 
+             className="fas fa-exclamation-triangle" 
+             style={{ color: '#50085e', marginRight: '10px' }} 
+           ></i>
+           Error
+         </ModalHeader>
+         <ModalBody style={{ textAlign: 'center', fontSize: '1.2rem', padding: '30px 20px' }}>
+           <i 
+             className="fas fa-exclamation-circle" 
+             style={{ color: '#ff6347', fontSize: '3rem', marginBottom: '20px' }}
+           ></i>
+           <div>{errorMessage}</div>
+         </ModalBody>
+         <ModalFooter style={{ justifyContent: 'center', borderTop: '2px solid #fff' }}>
+           <Button 
+             color="primary" 
+             onClick={toggleErrorModal} 
+             style={{ backgroundColor: '#50085e', borderColor: '#50085e', padding: '10px 20px' }}
+           >
+             OK
+           </Button>
+         </ModalFooter>
+       </Modal>
     </>
   );
 };

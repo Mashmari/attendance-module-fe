@@ -1,4 +1,6 @@
-// this js file is for School Data page.
+// // // // this js file is for School Data page.
+
+
 
 import React, { useState, useEffect } from "react";
 import {
@@ -11,6 +13,11 @@ import {
   PaginationItem,
   PaginationLink,
   Input,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button
 } from "reactstrap";
 import Header from "components/Headers/Header.js";
 import axios from "axios";
@@ -21,14 +28,20 @@ const Studentdata = () => {
   const [schoolNameFilter, setSchoolNameFilter] = useState("");
   const [classNameFilter, setClassNameFilter] = useState("");
   const [locationIdFilter, setLocationIdFilter] = useState("");
+  const [errorModal, setErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const pageSize = 10;
 
+  const toggleErrorModal = () => setErrorModal(!errorModal);
+
   useEffect(() => {
-    const fetchStudents = async (page = 1, limit = 10) => {
+    const fetchStudents = async () => {
       try {
         const response = await axios.get("http://localhost:8080/api/mamschool/get");
         setStudents(response.data);
       } catch (error) {
+        setErrorMessage("Something went wrong. Please try again later.");
+        setErrorModal(true);
         console.error("Error fetching data:", error.response ? error.response.data : error.message);
       }
     };
@@ -54,6 +67,13 @@ const Studentdata = () => {
     (currentPage - 1) * pageSize,
     currentPage * pageSize
   );
+
+  const cellStyle = {
+    padding: '8px',
+    textAlign: 'left',
+    whiteSpace: 'normal',
+    wordWrap: 'break-word',
+  };
 
   return (
     <>
@@ -120,22 +140,22 @@ const Studentdata = () => {
                     >
                       <thead>
                         <tr>
-                          <th scope="col" style={{ width: "20%", color: "purple", textAlign: 'left', padding: '8px' }}>
+                          <th scope="col" style={{ ...cellStyle, width: "20%", color: "purple" }}>
                             School ID
                           </th>
-                          <th scope="col" style={{ width: "20%", color: "purple", textAlign: 'left', padding: '8px' }}>
+                          <th scope="col" style={{ ...cellStyle, width: "20%", color: "purple" }}>
                             School Name
                           </th>
-                          <th scope="col" style={{ width: "20%", color: "purple", textAlign: 'left', padding: '8px' }}>
+                          <th scope="col" style={{ ...cellStyle, width: "20%", color: "purple" }}>
                             Class ID
                           </th>
-                          <th scope="col" style={{ width: "20%", color: "purple", textAlign: 'left', padding: '8px' }}>
+                          <th scope="col" style={{ ...cellStyle, width: "20%", color: "purple" }}>
                             Class Name
                           </th>
-                          <th scope="col" style={{ width: "20%", color: "purple", textAlign: 'left', padding: '8px' }}>
+                          <th scope="col" style={{ ...cellStyle, width: "20%", color: "purple" }}>
                             Location ID
                           </th>
-                          <th scope="col" style={{ width: "20%", color: "purple", textAlign: 'left', padding: '8px' }}>
+                          <th scope="col" style={{ ...cellStyle, width: "20%", color: "purple" }}>
                             API User ID
                           </th>
                         </tr>
@@ -151,12 +171,12 @@ const Studentdata = () => {
                       <tbody style={{ backgroundColor: "#f9f9f9" }}>
                         {slicedStudents.map((student) => (
                           <tr key={student.API_User_ID}>
-                            <td style={{ whiteSpace: "nowrap", overflow: 'hidden', textOverflow: 'ellipsis', textAlign: 'left', padding: '8px' }}>{student.School_ID}</td>
-                            <td style={{ whiteSpace: "normal", wordWrap: 'break-word', textAlign: 'left', padding: '8px' }}>{student.School_Name}</td>
-                            <td style={{ whiteSpace: "nowrap", overflow: 'hidden', textOverflow: 'ellipsis', textAlign: 'left', padding: '8px' }}>{student.Class_ID}</td>
-                            <td style={{ whiteSpace: "normal", wordWrap: 'break-word', textAlign: 'left', padding: '8px' }}>{student.Class_Name}</td>
-                            <td style={{ whiteSpace: "nowrap", overflow: 'hidden', textOverflow: 'ellipsis', textAlign: 'left', padding: '8px' }}>{student.Location_ID}</td>
-                            <td style={{ whiteSpace: "normal", wordWrap: 'break-word', textAlign: 'left', padding: '8px' }}>{student.API_User_ID}</td>
+                            <td style={cellStyle}>{student.School_ID}</td>
+                            <td style={cellStyle}>{student.School_Name}</td>
+                            <td style={cellStyle}>{student.Class_ID}</td>
+                            <td style={cellStyle}>{student.Class_Name}</td>
+                            <td style={cellStyle}>{student.Location_ID}</td>
+                            <td style={cellStyle}>{student.API_User_ID}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -181,6 +201,36 @@ const Studentdata = () => {
           </div>
         </Row>
       </Container>
+
+      {/* Error Modal */}
+      <Modal isOpen={errorModal} toggle={toggleErrorModal} centered>
+        <ModalHeader 
+          toggle={toggleErrorModal} 
+          style={{ color: '#50085e', fontWeight: 'bold', borderBottom: '2px ' }}
+        >
+          <i 
+            className="fas fa-exclamation-triangle" 
+            style={{ color: '#50085e', marginRight: '10px' }} 
+          ></i>
+          Error
+        </ModalHeader>
+        <ModalBody style={{ textAlign: 'center', fontSize: '1.2rem', padding: '30px 20px' }}>
+          <i 
+            className="fas fa-exclamation-circle" 
+            style={{ color: '#ff6347', fontSize: '3rem', marginBottom: '20px' }} 
+          ></i>
+          <div>{errorMessage}</div>
+        </ModalBody>
+        <ModalFooter style={{ justifyContent: 'center', borderTop: '2px solid #fff' }}>
+         
+            <Button 
+      color="primary" 
+      onClick={toggleErrorModal} 
+      style={{ backgroundColor: '#50085e', borderColor: '#50085e', padding: '10px 20px' }}
+    >
+            OK</Button>
+        </ModalFooter>
+      </Modal>
     </>
   );
 };

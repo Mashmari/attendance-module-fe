@@ -6,7 +6,7 @@ import { Container } from "reactstrap";
 import AdminNavbar from "components/Navbars/AdminNavbar.js";
 import AdminFooter from "components/Footers/AdminFooter.js";
 import Sidebar from "components/Sidebar/Sidebar.js";
-
+//import logo from '../../public/assets/img/brand/cropped-main-logo.jpeg'; // Adjust the path as needed
 import routes from "routes.js";
 
 const Admin = (props) => {
@@ -42,7 +42,7 @@ const Admin = (props) => {
     }
     return "Brand";
   };
-
+//const logoPath= process.env.REACT_APP_MASHMARI_LOGO;
   return (
     <>
       <Sidebar
@@ -50,7 +50,9 @@ const Admin = (props) => {
         routes={routes}
         logo={{
           innerLink: "/admin/index",
-          imgSrc: require("C:/Users/dell/Documents/GitHub/attendance-module-fe/src/assets/img/brand/cropped-main-logo.jpeg"),
+        
+          imgSrc: require("../assets/img/brand/cropped-main-logo.jpeg"),
+         
           imgAlt: "...",
         }}
       />

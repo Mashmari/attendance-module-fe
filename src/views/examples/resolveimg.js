@@ -5,12 +5,7 @@ import {
   Button,
   Card,
   CardHeader,
-  CardFooter,
-  Media,
-  Pagination,
-  PaginationItem,
-  PaginationLink,
-  Table,
+ 
   Container,
   Row,
   Col,

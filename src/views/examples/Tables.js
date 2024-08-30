@@ -1,4 +1,4 @@
-// this js file is for Daily Attendance page.
+//this js file is for Daily Attendance page.
 import React, { useEffect, useState } from "react";
 import {
   Badge,
@@ -85,8 +85,9 @@ const Tables = () => {
     const d = new Date(date);
     return new Date(d.getFullYear(), d.getMonth(), d.getDate());
   };
+  
   const filteredStudents = students.filter((student) => {
-    if (statusFilter && student.match_outcome !== statusFilter) return false;
+    if (statusFilter && student.match_outcome.toLowerCase() !== statusFilter.toLowerCase()) return false;
   
     const studentDate = getDateOnly(student.Upload_timestamp);
     const startDateOnly = startDate ? getDateOnly(startDate) : null;
@@ -97,7 +98,7 @@ const Tables = () => {
   
     return true;
   });
-
+  
   const handlePageChange = (page) => {
     if (page > 0 && page <= totalPages) {
       setCurrentPage(page);
@@ -112,18 +113,20 @@ const toggleErrorModal = () => {
   setErrorModal(!errorModal);
 };
 
+ 
   const getStatusColor = (status) => {
-    switch (status) {
-      case "Positive":
+    switch (status.toLowerCase()) {
+      case "positive":
         return "green";
-      case "Negative":
+      case "negative":
         return "red";
-      case "Spoof":
-        return "yellow";
+      case "spoof":
+        return "orange";
       default:
         return "";
     }
   };
+  
 
   return (
     <>
@@ -274,39 +277,41 @@ const toggleErrorModal = () => {
                       <td>
                         {formatTimestamp(student.Upload_timestamp)}
                       </td>
+              
                       <td className="text-right">
-                        <div className="text-center">
-                          {student.match_outcome === "Spoof" ? (
-                            <i
-                              className="fas fa-times"
-                              style={{
-                                color: "red",
-                                fontSize: "24px",
-                                marginTop: "16px",
-                              }}
-                            ></i>
-                          ) : student.match_outcome === "Negative" && student.Status_Pending === "Yes" ? (
-                            <Link to={`/admin/resolveimg?id=${student.id}&timestamp=${formatTimestamp(student.Upload_timestamp)}&imagePath=${student.imageUrl}`}>
-                              <Button
-                                className="mt-4"
-                                color="primary"
-                                type="button"
-                              >
-                                Resolve
-                              </Button>
-                            </Link>
-                          ) : (
-                            <i
-                              className="fas fa-check"
-                              style={{
-                                color: "green",
-                                fontSize: "24px",
-                                marginTop: "16px",
-                              }}
-                            ></i>
-                          )}
-                        </div>
-                      </td>
+  <div className="text-center">
+    {student.match_outcome.toLowerCase() === "spoof" ? (
+      <i
+        className="fas fa-times"
+        style={{
+          color: "red",
+          fontSize: "24px",
+          marginTop: "16px",
+        }}
+      ></i>
+    ) : student.match_outcome.toLowerCase() === "negative" && student.Status_Pending === "Yes" ? (
+      <Link to={`/admin/resolveimg?id=${student.id}&timestamp=${formatTimestamp(student.Upload_timestamp)}&imagePath=${student.imageUrl}`}>
+        <Button
+          className="mt-4"
+          color="primary"
+          type="button"
+        >
+          Resolve
+        </Button>
+      </Link>
+    ) : (
+      <i
+        className="fas fa-check"
+        style={{
+          color: "green",
+          fontSize: "24px",
+          marginTop: "16px",
+        }}
+      ></i>
+    )}
+  </div>
+</td>
+
                     </tr>
                   ))}
                 </tbody>
@@ -365,18 +370,44 @@ const toggleErrorModal = () => {
           <img src={modalImage} alt="Modal" style={{ width: "100%" }} />
         </ModalBody>
       </Modal>
-{/* Error Modal */}
-<Modal isOpen={errorModal} toggle={toggleErrorModal}>
-<ModalHeader toggle={toggleErrorModal} >Error</ModalHeader>
-<ModalBody>{errorMessage}</ModalBody>
-<ModalFooter>
-  <Button color="primary" onClick={toggleErrorModal}>OK</Button>
-</ModalFooter>
+
+<Modal isOpen={errorModal} toggle={toggleErrorModal} centered>
+  <ModalHeader 
+    toggle={toggleErrorModal} 
+    style={{ color: '#50085e', fontWeight: 'bold', borderBottom: '2px ' }}
+  >
+    <i 
+      className="fas fa-exclamation-triangle" 
+      style={{ color: '#50085e', marginRight: '10px' }} 
+    ></i>
+    Error
+  </ModalHeader>
+  <ModalBody style={{ textAlign: 'center', fontSize: '1.2rem', padding: '30px 20px' }}>
+    <i 
+      className="fas fa-exclamation-circle" 
+      style={{ color: '#ff6347', fontSize: '3rem', marginBottom: '20px' }}
+    ></i>
+    <div>{errorMessage}</div>
+  </ModalBody>
+  <ModalFooter style={{ justifyContent: 'center', borderTop: '2px solid #fff' }}>
+    <Button 
+      color="primary" 
+      onClick={toggleErrorModal} 
+      style={{ backgroundColor: '#50085e', borderColor: '#50085e', padding: '10px 20px' }}
+    >
+      OK
+    </Button>
+  </ModalFooter>
 </Modal>
+
     </>
   );
 };
 
  export default Tables;
+
+
+
+
 
 

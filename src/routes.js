@@ -23,8 +23,8 @@ var routes = [
   },
   {
     path: "/studentdata",
-    name: "School Data",
-    icon: "ni ni-single-02",
+    name: "School Data ",
+    icon: "ni ni-single-02 text-red",
     component: <Studentdata />,
     layout: "/admin",
     
@@ -32,14 +32,14 @@ var routes = [
   {
     path: "/resolveatt",
     name: "Student Roster",
-    icon: "ni ni-settings",
+    icon: "ni ni-settings text-red",
     component: <Resolveatt />,
     layout: "/admin",
   },
   {
     path: "/addstudent",
     name: "Add Student",
-    icon: "ni ni-settings",
+    icon: "ni ni-settings ",
     component: <AddStudent />,
     layout: "/admin",
     hidden: true
@@ -78,3 +78,59 @@ var routes = [
   // },
 ];
 export default routes;
+// var routes = [
+//   {
+//     path: "/index",
+//     name: "Dashboard",
+//     icon: <i className="ni ni-tv-2" style={{ color: '#50085e' }}></i>,
+//     component: <Index />,
+//     layout: "/admin",
+//     hidden: true,
+//   },
+//   {
+//     path: "/studentdata",
+//     name: "School Data",
+//     icon: <i className="ni ni-single-02" style={{ color: '#50085e' }}></i>,
+//     component: <Studentdata />,
+//     layout: "/admin",
+//   },
+//   {
+//     path: "/resolveatt",
+//     name: "Student Roster",
+//     icon: <i className="ni ni-settings" style={{ color: '#50085e' }}></i>,
+//     component: <Resolveatt />,
+//     layout: "/admin",
+//   },
+//   {
+//     path: "/addstudent",
+//     name: "Add Student",
+//     icon: <i className="ni ni-settings" style={{ color: '#50085e' }}></i>,
+//     component: <AddStudent />,
+//     layout: "/admin",
+//     hidden: true,
+//   },
+//   {
+//     path: "/tables",
+//     name: "Daily Attendance",
+//     icon: <i className="ni ni-bullet-list-67" style={{ color: '#50085e' }}></i>,
+//     component: <Tables />,
+//     layout: "/admin",
+//   },
+//   {
+//     path: "/resolveimg",
+//     name: "Resolve Image Store",
+//     icon: <i className="ni ni-image" style={{ color: '#50085e' }}></i>,
+//     component: <Resolveimg />,
+//     layout: "/admin",
+//     hidden: true,
+//   },
+//   {
+//     path: "/testattendance",
+//     name: "Test Attendance",
+//     icon: <i className="ni ni-single-02" style={{ color: '#50085e' }}></i>,
+//     component: <Testattendance />,
+//     layout: "/admin",
+//     hidden: true,
+//   },
+// ];
+// export default routes;
